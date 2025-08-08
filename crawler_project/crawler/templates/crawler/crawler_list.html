@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>爬虫列表</title>
+    <style>
+        body { font-family: sans-serif; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        .container { padding: 2em; }
+        .form-container { margin-top: 2em; padding: 1em; border: 1px solid #ccc; }
+        .form-container h2 { margin-top: 0; }
+        .form-group { margin-bottom: 1em; }
+        label { display: block; margin-bottom: 0.5em; }
+        input, select { width: 100%; padding: 8px; }
+        button { padding: 10px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        nav { margin-bottom: 1em; }
+        nav a { text-decoration: none; padding: 10px; background: #eee; color: #333; }
+        nav a.active { background: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>爬虫管理系统</h1>
+        <nav>
+            <a href="{% url 'crawler_list' %}" class="active">爬虫列表</a>
+            <a href="{% url 'job_list' %}">工作列表</a>
+        </nav>
+
+        <h2>可用的爬虫</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>名称</th>
+                    <th>描述</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for crawler in crawlers %}
+                <tr>
+                    <td>{{ crawler.id }}</td>
+                    <td>{{ crawler.name }}</td>
+                    <td>{{ crawler.description }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">没有可用的爬虫。</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="form-container">
+            <h2>启动一个新的爬取工作</h2>
+            <form action="{% url 'start_crawl' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="crawler_id">选择一个爬虫:</label>
+                    <select name="crawler_id" id="crawler_id" required>
+                        {% for crawler in crawlers %}
+                        <option value="{{ crawler.id }}">{{ crawler.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="url">要爬取的URL:</label>
+                    <input type="url" name="url" id="url" required placeholder="http://example.com">
+                </div>
+                <button type="submit">启动爬虫</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

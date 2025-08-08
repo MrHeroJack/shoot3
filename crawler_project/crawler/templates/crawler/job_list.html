@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>工作列表</title>
+    <style>
+        body { font-family: sans-serif; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        .container { padding: 2em; }
+        .status-pending { color: #888; }
+        .status-running { color: #007bff; }
+        .status-completed { color: #28a745; }
+        .status-failed { color: #dc3545; }
+        nav { margin-bottom: 1em; }
+        nav a { text-decoration: none; padding: 10px; background: #eee; color: #333; }
+        nav a.active { background: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>爬虫管理系统</h1>
+        <nav>
+            <a href="{% url 'crawler_list' %}">爬虫列表</a>
+            <a href="{% url 'job_list' %}" class="active">工作列表</a>
+        </nav>
+
+        <h2>爬取工作历史</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>爬虫</th>
+                    <th>URL</th>
+                    <th>状态</th>
+                    <th>开始时间</th>
+                    <th>结束时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr>
+                    <td>{{ job.id }}</td>
+                    <td>{{ job.crawler.name }}</td>
+                    <td>{{ job.parameters.url }}</td>
+                    <td class="status-{{ job.status }}">{{ job.get_status_display }}</td>
+                    <td>{{ job.start_time|default:"N/A" }}</td>
+                    <td>{{ job.end_time|default:"N/A" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">没有爬取工作。</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
