@@ -1,10 +1,9 @@
-import threading
 from django.core.management.base import BaseCommand, CommandError
 from crawler.models import Crawler, CrawlJob
 from crawler.crawlers import run_crawl_in_thread
 
 class Command(BaseCommand):
-    help = 'Starts a crawl job for a given crawler and URL, running it in a background thread.'
+    help = 'Runs a crawl job for a given crawler and URL.'
 
     def add_arguments(self, parser):
         parser.add_argument('crawler_id', type=int, help='The ID of the crawler to run')
@@ -19,22 +18,17 @@ class Command(BaseCommand):
         except Crawler.DoesNotExist:
             raise CommandError(f'Crawler with ID "{crawler_id}" does not exist.')
 
-        # Create the job with a 'pending' status.
-        # The thread will update it to 'running'.
         job = CrawlJob.objects.create(
             crawler=crawler,
             status='pending',
             parameters={'url': url}
         )
 
-        self.stdout.write(self.style.SUCCESS(f'Created job {job.id} for crawler "{crawler.name}" with URL: {url}'))
+        self.stdout.write(self.style.SUCCESS(f'Created job {job.id}. Running synchronously...'))
 
-        # Create and start the background thread
-        thread = threading.Thread(
-            target=run_crawl_in_thread,
-            args=(job.id,),
-            daemon=True  # Use daemon threads so they exit when the main process exits
-        )
-        thread.start()
+        # Run the crawl function directly
+        run_crawl_in_thread(job.id)
 
-        self.stdout.write(self.style.SUCCESS(f'Job {job.id} started in a background thread.'))
+        # Check the final status of the job
+        job.refresh_from_db()
+        self.stdout.write(self.style.SUCCESS(f'Job {job.id} finished with status: {job.status}'))
