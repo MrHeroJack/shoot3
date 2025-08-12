@@ -19,8 +19,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 
+# 项目的主URL路由配置
 urlpatterns = [
+    # Django admin后台
     path("admin/", admin.site.urls),
+
+    # 将所有 /crawler/ 开头的URL都转发到 crawler 应用的 urls.py 文件中进行处理
     path("crawler/", include("crawler.urls")),
+
+    # 将根URL (/) 重定向到爬虫列表页面
     path("", RedirectView.as_view(url="/crawler/", permanent=True)),
 ]
